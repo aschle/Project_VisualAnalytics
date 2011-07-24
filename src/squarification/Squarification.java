@@ -1,7 +1,6 @@
 package squarification;
 
 import java.util.ArrayList;
-import org.w3c.dom.css.Rect;
 
 public class Squarification {
 
@@ -16,10 +15,9 @@ public class Squarification {
 
 	// position to start with the layout
 	private int posX = 0;
-	private int posY = 0;
 
-	public ArrayList<RectInterface> getSquarify(
-			ArrayList<RectInterface> children, int dimX, int dimY) {
+	public void getSquarify(ArrayList<? extends RectInterface> children,
+			int dimX, int dimY) {
 
 		if (dimY <= dimX) {
 			isDimX = false;
@@ -32,23 +30,23 @@ public class Squarification {
 		}
 
 		squarify(children, new ArrayList<RectInterface>());
-
-		return new ArrayList<RectInterface>();
 	}
 
-	private void squarify(ArrayList<RectInterface> children,
+	private void squarify(ArrayList<? extends RectInterface> children,
 			ArrayList<RectInterface> row) {
 
 		// if there are no more children
 		if (children.size() < 1) {
+			layoutRow(row);
 			return;
 		}
 
 		// get the child with the maximal area
 		RectInterface child = getMax(children);
+		
+		if (row.isEmpty() || worst(row) > worst(concat(row, child))) {
 
-		if (worst(row, divided) >= worst(concat(row, child), divided)) {
-			squarify(getTail(children), concat(row, child));
+			squarify(getTail(children, child), concat(row, child));
 
 		} else {
 			layoutRow(row);
@@ -56,28 +54,31 @@ public class Squarification {
 		}
 	}
 
-	private float worst(ArrayList<RectInterface> areas, int width) {
+	private double worst(ArrayList<RectInterface> areas) {
 
 		// calculate sum of areas
 		int sum = getSum(areas);
 
-		float currentMax = 0;
+		double currentMax = 0;
 
 		for (int i = 0; i < areas.size(); i++) {
+			
+			double a = Math.pow(divided, 2) * areas.get(i).getArea();
+			double b = Math.pow(sum, 2);
 
-			float localMax = Math.max((width * width * areas.get(i).getArea())
-					/ (sum * sum), (sum * sum) / width * width
-					* areas.get(i).getArea());
+			double localMax = Math.max(a/b,b/a);
+			
 			if (localMax > currentMax) {
 				currentMax = localMax;
 			}
-
 		}
+		System.out.println(currentMax);
 		return currentMax;
 	}
 
 	private void layoutRow(ArrayList<RectInterface> row) {
-
+		System.out.println("new");
+		
 		int sum = getSum(row);
 		int notDividedRect = sum / this.divided;
 
@@ -86,8 +87,7 @@ public class Squarification {
 
 		if (isDimX == false) {
 			offsetY = divided;
-		}
-		else {
+		} else {
 			offsetY = notDivided - notDividedRect;
 		}
 
@@ -98,19 +98,21 @@ public class Squarification {
 			if (isDimX == false) {
 				offsetY = offsetY - dividedRect;
 				row.get(i).setDimention(notDividedRect, dividedRect);
-				row.get(i).setStartPoint(offsetX + posX, offsetY + posY);
+				row.get(i).setStartPoint(offsetX + posX, offsetY);
 			} else {
 				row.get(i).setDimention(dividedRect, notDividedRect);
-				row.get(i).setStartPoint(offsetX + posX, offsetY + posY);
+				row.get(i).setStartPoint(offsetX + posX, offsetY);
 				offsetX = offsetX + dividedRect;
 			}
+
+			results.add(row.get(i));
 		}
 
 		if (isDimX == false) {
 			// move posX more to the rigth
 			posX = posX + notDividedRect;
 		}
-		
+
 		// calculate new dimensions
 		int tmp = divided;
 		divided = notDivided - notDividedRect;
@@ -123,14 +125,14 @@ public class Squarification {
 	/**
 	 * Returns the rectangle with the maximal value.
 	 * 
-	 * @param list
+	 * @param children
 	 * @return Rectangle with the maximal area.
 	 */
-	private RectInterface getMax(ArrayList<RectInterface> list) {
-		RectInterface max = null;
-		for (int i = 0; i < list.size(); i++) {
-			if (list.get(i).getArea() > max.getArea()) {
-				max = list.get(i);
+	private RectInterface getMax(ArrayList<? extends RectInterface> children) {
+		RectInterface max = children.get(0);
+		for (int i = 1; i < children.size(); i++) {
+			if (children.get(i).getArea() > max.getArea()) {
+				max = children.get(i);
 			}
 		}
 		return max;
@@ -138,14 +140,16 @@ public class Squarification {
 
 	/**
 	 * 
-	 * @param list
+	 * @param children
 	 * @return
 	 */
-	private ArrayList<RectInterface> getTail(ArrayList<RectInterface> list) {
+	private ArrayList<RectInterface> getTail(
+			ArrayList<? extends RectInterface> children, RectInterface child) {
 		ArrayList<RectInterface> tail = new ArrayList<RectInterface>();
-		for (int i = 1; i < list.size(); i++) {
-			tail.add(list.get(i));
+		for (RectInterface r : children) {
+			tail.add(r);
 		}
+		tail.remove(child);
 		return tail;
 	}
 
@@ -157,8 +161,12 @@ public class Squarification {
 	 */
 	private ArrayList<RectInterface> concat(ArrayList<RectInterface> list,
 			RectInterface rect) {
-		ArrayList<RectInterface> newList = (ArrayList<RectInterface>) list
-				.clone();
+
+		ArrayList<RectInterface> newList = new ArrayList<RectInterface>();
+		for (RectInterface r : list) {
+			newList.add(r);
+		}
+
 		newList.add(rect);
 		return newList;
 	}
