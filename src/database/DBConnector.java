@@ -11,7 +11,7 @@ public class DBConnector {
 	private static String driver = "org.sqlite.JDBC";
 	private static String baseURL = "jdbc:sqlite:statistik.db";
 
-	public static Connection connection = null;
+	public Connection connection = null;
 
 	private DBConnector() {
 		try {
@@ -33,7 +33,7 @@ public class DBConnector {
 		return instance;
 	}
 	
-	public static void init() throws SQLException{
+	public void init() throws SQLException{
 		Statement stat = connection.createStatement();
 		stat.executeUpdate("DROP TABLE IF EXISTS straftat;");
 		stat.executeUpdate("DROP TABLE IF EXISTS category;");
@@ -67,5 +67,9 @@ public class DBConnector {
 				"('H', 'Straftaten im Straßenverkehr');");
 		stat.executeUpdate("INSERT INTO category VALUES " +
 				"('I', 'Straftaten nach anderen Bundes- u. Landesgesetzen');");
+	}
+
+	public static void setBaseURL(String _baseURL) {
+		baseURL = _baseURL;
 	}
 }
