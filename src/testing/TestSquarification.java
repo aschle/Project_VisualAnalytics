@@ -18,30 +18,60 @@ import gui.Rectangle;
 public class TestSquarification extends PApplet {
 
 	ArrayList<Rectangle> rects = new ArrayList<Rectangle>();
+
+	// Area in pixel of the diagram
 	int sum = 0;
 
+	// Offset so center the diagram
+	int offsetX;
+	int offsetY;
+
+	// Dimension of the whole area
+	int w = 1024;
+	int h = 786;
+
+	// Dimension of the diagram
+	int dimX = 920;
+	int dimY;
+
 	public void setup() {
-		size(600, 800);
+		size(w, h);
 		smooth();
 		background(255);
 
+		// Testdaten lasen
 		getDBvalues();
 
-		Squarification s = new Squarification();
-		s.getSquarify(rects, 1000, sum/1000);
+		dimY = Math.round(sum / dimX);
 		
+		offsetX = Math.round((w - dimX) / 2);
+		offsetY = Math.round((h - dimY) / 2);
+
+		Squarification s = new Squarification();
+		s.getSquarify(rects, dimX, dimY);
+
+		for (int i = 0; i < rects.size(); i++) {
+			rects.get(i).setOffset(offsetX, offsetY);
+		}
 	}
 
 	public void draw() {
+		background(255);
+		noStroke();
 
 		for (int i = 0; i < rects.size(); i++) {
 			rects.get(i).display();
+		}
+
+		for (int i = 0; i < rects.size(); i++) {
+			rects.get(i).mouseText();
 		}
 	}
 
 	public void getDBvalues() {
 
 		try {
+
 			DBConnector conn = DBConnector.getInstance();
 			conn.init();
 
@@ -51,10 +81,10 @@ public class TestSquarification extends PApplet {
 
 			Statement selectStmt = conn.connection.createStatement();
 			ResultSet rs = selectStmt
-					.executeQuery("select sum(number), category.name from straftat, category WHERE category.id = straftat.category GROUP BY category;");
+					.executeQuery("select sum(number), name from straftat WHERE name <> 'Sonstiges' GROUP BY name;");
 
 			while (rs.next()) {
-				rects.add(new Rectangle(rs.getInt(1), this));
+				rects.add(new Rectangle(rs.getInt(1), rs.getString(2), this));
 				sum = sum + rs.getInt(1);
 			}
 		} catch (SQLException e) {
