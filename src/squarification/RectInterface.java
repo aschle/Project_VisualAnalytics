@@ -12,7 +12,7 @@ public interface RectInterface {
 	 * 
 	 * @return the area of the rectangle
 	 */
-	public int getArea();
+	public double getArea();
 
 	/**
 	 * This Method is used to set the dimension of the rectangle.

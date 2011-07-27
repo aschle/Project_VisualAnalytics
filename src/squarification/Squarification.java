@@ -1,6 +1,7 @@
 package squarification;
 
 import java.util.ArrayList;
+import java.util.Random;
 
 public class Squarification {
 
@@ -10,11 +11,11 @@ public class Squarification {
 	private boolean isDimX;
 
 	// the length of the side which the row is going to layout
-	private int divided;
-	private int notDivided;
+	private double divided;
+	private double notDivided;
 
 	// position to start with the layout
-	private int posX = 0;
+	private double posX = 0;
 
 	public void getSquarify(ArrayList<? extends RectInterface> children,
 			int dimX, int dimY) {
@@ -44,7 +45,7 @@ public class Squarification {
 		// get the child with the maximal area
 		RectInterface child = getMax(children);
 		
-		if (row.isEmpty() || worst(row) > worst(concat(row, child))) {
+		if (row.isEmpty() || worst(row) >= worst(concat(row, child))) {
 
 			squarify(getTail(children, child), concat(row, child));
 
@@ -57,7 +58,7 @@ public class Squarification {
 	private double worst(ArrayList<RectInterface> areas) {
 
 		// calculate sum of areas
-		int sum = getSum(areas);
+		double sum = getSum(areas);
 
 		double currentMax = 0;
 
@@ -79,11 +80,11 @@ public class Squarification {
 	private void layoutRow(ArrayList<RectInterface> row) {
 		System.out.println("new");
 		
-		int sum = getSum(row);
-		int notDividedRect = sum / this.divided;
+		double sum = getSum(row);
+		double notDividedRect = sum / this.divided;
 
-		int offsetX = 0;
-		int offsetY = 0;
+		double offsetX = 0;
+		double offsetY = 0;
 
 		if (isDimX == false) {
 			offsetY = divided;
@@ -93,15 +94,15 @@ public class Squarification {
 
 		for (int i = 0; i < row.size(); i++) {
 
-			int dividedRect = row.get(i).getArea() / notDividedRect;
+			double dividedRect = row.get(i).getArea() / notDividedRect;
 
 			if (isDimX == false) {
 				offsetY = offsetY - dividedRect;
-				row.get(i).setDimention(notDividedRect, dividedRect);
-				row.get(i).setStartPoint(offsetX + posX, offsetY);
+				row.get(i).setDimention((int) Math.round(notDividedRect), (int) Math.round(dividedRect));
+				row.get(i).setStartPoint((int) Math.round(offsetX + posX), (int) Math.round(offsetY));
 			} else {
-				row.get(i).setDimention(dividedRect, notDividedRect);
-				row.get(i).setStartPoint(offsetX + posX, offsetY);
+				row.get(i).setDimention( (int)Math.round(dividedRect), (int) Math.round(notDividedRect));
+				row.get(i).setStartPoint((int) Math.round(offsetX + posX), (int) Math.round(offsetY));
 				offsetX = offsetX + dividedRect;
 			}
 
@@ -114,7 +115,7 @@ public class Squarification {
 		}
 
 		// calculate new dimensions
-		int tmp = divided;
+		double tmp = divided;
 		divided = notDivided - notDividedRect;
 		notDivided = tmp;
 
@@ -176,8 +177,8 @@ public class Squarification {
 	 * @param list
 	 * @return
 	 */
-	private int getSum(ArrayList<RectInterface> list) {
-		int sum = 0;
+	private double getSum(ArrayList<RectInterface> list) {
+		double sum = 0;
 		for (int i = 0; i < list.size(); i++) {
 			sum = sum + list.get(i).getArea();
 		}
