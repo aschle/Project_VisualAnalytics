@@ -7,31 +7,36 @@ import java.util.ArrayList;
 
 import database.DBConnector;
 import database.Parser;
-
 import processing.core.PApplet;
-
-import squarification.RectInterface;
 import squarification.Squarification;
-
+import gui.Button;
 import gui.Rectangle;
 
 public class TestSquarification extends PApplet {
+
+	private static final long serialVersionUID = 1L;
 
 	ArrayList<Rectangle> rects = new ArrayList<Rectangle>();
 
 	// Area in pixel of the diagram
 	int sum = 0;
 
-	// Offset so center the diagram
+	// Offset to center the diagram
 	int offsetX;
 	int offsetY;
 
 	// Dimension of the whole area
-	int w = 1024;
-	int h = 786;
+	int w = 1000;
+	int h = 700;
 
-	// Dimension of the diagram
-	int dimX = 920;
+	// Buttons
+	//Button b1;
+	//Button b2;
+	
+	// Boolean
+	boolean first = false;
+	
+	int dimX;
 	int dimY;
 
 	public void setup() {
@@ -39,19 +44,31 @@ public class TestSquarification extends PApplet {
 		smooth();
 		background(255);
 
-		// Testdaten lasen
-		getDBvalues();
+		//b1 = new Button("Ausländer", 20, 20, this);
+		//b2 = new Button("Deutsche", b1.dimX + 40, 20, this);
 
-		dimY = Math.round(sum / dimX);
+		if (first == false) {
+			// Read data.
+			getDBvalues();
+			first = true;
+		}
+
+		int borderX = 100, borderY = 100;
+
+		double dimX = w - 2 * borderX;
+		double dimY = h - 2 * borderY;
 		
-		offsetX = Math.round((w - dimX) / 2);
-		offsetY = Math.round((h - dimY) / 2);
+		double yS =Math.sqrt(((double)sum*dimY)/dimX);
+		double xS = sum/yS;
+
+		double trans = dimY/yS;
 
 		Squarification s = new Squarification();
-		s.getSquarify(rects, dimX, dimY);
+		s.getSquarify(rects, xS, yS);
 
 		for (int i = 0; i < rects.size(); i++) {
-			rects.get(i).setOffset(offsetX, offsetY);
+			rects.get(i).setOffset(borderX, borderY);
+			rects.get(i).setTransformationRatios(trans);
 		}
 	}
 
@@ -66,6 +83,15 @@ public class TestSquarification extends PApplet {
 		for (int i = 0; i < rects.size(); i++) {
 			rects.get(i).mouseText();
 		}
+
+		//b1.display();
+	}
+
+	public void mouseClicked() {
+		rects.clear();
+		sum = 0;
+		//b1.mouseClicked();
+		//b2.mouseClicked();
 	}
 
 	public void getDBvalues() {
@@ -81,17 +107,42 @@ public class TestSquarification extends PApplet {
 
 			Statement selectStmt = conn.connection.createStatement();
 			ResultSet rs = selectStmt
-					.executeQuery("select sum(number), name from straftat WHERE name <> 'Sonstiges' GROUP BY name;");
+					.executeQuery("select sum(number), name, category from straftat WHERE name <> 'Sonstiges' AND origin = 'A' GROUP BY name;");
 
 			while (rs.next()) {
-				rects.add(new Rectangle(rs.getInt(1), rs.getString(2), this));
+				rects.add(new Rectangle(rs.getInt(1), rs.getString(2), rs
+						.getString(3).toCharArray()[0], this));
 				sum = sum + rs.getInt(1);
 			}
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+	public void getDBvalues2() {
+		try {
+
+			DBConnector conn = DBConnector.getInstance();
+			conn.init();
+
+			Parser p = new Parser("data.csv");
+			p.open();
+			p.parse();
+
+			Statement selectStmt = conn.connection.createStatement();
+			ResultSet rs = selectStmt
+					.executeQuery("select sum(number), name, category from straftat WHERE origin == 'A' AND name <> 'Sonstiges' GROUP BY name;");
+
+			while (rs.next()) {
+				rects.add(new Rectangle(rs.getInt(1), rs.getString(2), rs
+						.getString(3).toCharArray()[0], this));
+				sum = sum + rs.getInt(1);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
