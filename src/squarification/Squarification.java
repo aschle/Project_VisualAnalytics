@@ -1,7 +1,6 @@
 package squarification;
 
 import java.util.ArrayList;
-import java.util.Random;
 
 public class Squarification {
 
@@ -16,6 +15,9 @@ public class Squarification {
 
 	// position to start with the layout
 	private double posX = 0;
+	
+	// normalize factor
+	private double norm = 1;
 
 	public void getSquarify(ArrayList<? extends RectInterface> children,
 			double dimX, double dimY) {
@@ -30,29 +32,33 @@ public class Squarification {
 			notDivided = dimY;
 		}
 
-		squarify(children, new ArrayList<RectInterface>());
+		// remember: norm is 1 initially!
+		norm = dimX * dimY / getSum(children);
+		
+		squarify(children);
 	}
 
-	private void squarify(ArrayList<? extends RectInterface> children,
-			ArrayList<RectInterface> row) {
+	private void squarify(ArrayList<? extends RectInterface> children) {
+
+		ArrayList<RectInterface> row = new ArrayList<RectInterface>();
 
 		// if there are no more children
-		if (children.size() < 1) {
-			layoutRow(row);
-			return;
+		while (children.size() > 0) {
+
+			// get the child with the maximal area
+			RectInterface child = getMax(children);
+
+			if (row.isEmpty() || worst(row) >= worst(concat(row, child))) {
+
+				children = getTail(children, child);
+				row = concat(row, child);
+
+			} else {
+				layoutRow(row);
+				row = new ArrayList<RectInterface>();
+			}
 		}
-
-		// get the child with the maximal area
-		RectInterface child = getMax(children);
-		
-		if (row.isEmpty() || worst(row) >= worst(concat(row, child))) {
-
-			squarify(getTail(children, child), concat(row, child));
-
-		} else {
-			layoutRow(row);
-			squarify(children, new ArrayList<RectInterface>());
-		}
+		layoutRow(row);
 	}
 
 	private double worst(ArrayList<RectInterface> areas) {
@@ -63,26 +69,25 @@ public class Squarification {
 		double currentMax = 0;
 
 		for (int i = 0; i < areas.size(); i++) {
-			
-			double a = Math.pow(divided, 2) * areas.get(i).getArea();
+
+			double a = Math.pow(divided, 2) * normalize(areas.get(i).getArea());
 			double b = Math.pow(sum, 2);
 
-			double localMax = Math.max(a/b,b/a);
-			
+			double localMax = Math.max(a / b, b / a);
+
 			if (localMax > currentMax) {
 				currentMax = localMax;
 			}
 		}
-		System.out.println(currentMax);
+
 		return currentMax;
 	}
 
 	private void layoutRow(ArrayList<RectInterface> row) {
-		System.out.println("new");
-		
+
 		double sum = getSum(row);
 		double notDividedRect = sum / this.divided;
-		
+
 		double offsetX = 0;
 		double offsetY = 0;
 
@@ -94,16 +99,17 @@ public class Squarification {
 
 		for (int i = 0; i < row.size(); i++) {
 
-			System.out.println("area: "+ row.get(i).getArea() + " "+ notDividedRect);
-			double dividedRect = row.get(i).getArea() / notDividedRect;
+			double dividedRect = normalize(row.get(i).getArea()) / notDividedRect;
 
 			if (isDimX == false) {
 				offsetY = offsetY - dividedRect;
-				row.get(i).setDimention((int)notDividedRect, (int)dividedRect);
+				row.get(i)
+						.setDimention((int) notDividedRect, (int) dividedRect);
 				row.get(i).setStartPoint((int) (offsetX + posX), (int) offsetY);
-			
+
 			} else {
-				row.get(i).setDimention( (int)dividedRect, (int)notDividedRect);
+				row.get(i)
+						.setDimention((int) dividedRect, (int) notDividedRect);
 				row.get(i).setStartPoint((int) (offsetX + posX), (int) offsetY);
 				offsetX = offsetX + dividedRect;
 			}
@@ -134,7 +140,7 @@ public class Squarification {
 	private RectInterface getMax(ArrayList<? extends RectInterface> children) {
 		RectInterface max = children.get(0);
 		for (int i = 1; i < children.size(); i++) {
-			if (children.get(i).getArea() > max.getArea()) {
+			if (normalize(children.get(i).getArea()) > normalize(max.getArea())) {
 				max = children.get(i);
 			}
 		}
@@ -179,11 +185,15 @@ public class Squarification {
 	 * @param list
 	 * @return
 	 */
-	private double getSum(ArrayList<RectInterface> list) {
+	private double getSum(ArrayList<? extends RectInterface> list) {
 		double sum = 0;
 		for (int i = 0; i < list.size(); i++) {
-			sum = sum + list.get(i).getArea();
+			sum = sum + normalize(list.get(i).getArea());
 		}
 		return sum;
+	}
+	
+	private double normalize(double value){
+		return value * norm;
 	}
 }

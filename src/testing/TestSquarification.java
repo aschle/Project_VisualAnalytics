@@ -1,9 +1,11 @@
 package testing;
 
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionListener;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import database.DBConnector;
 import database.Parser;
@@ -17,6 +19,7 @@ public class TestSquarification extends PApplet {
 	private static final long serialVersionUID = 1L;
 
 	ArrayList<Rectangle> rects = new ArrayList<Rectangle>();
+	HashMap<String, Button> buttons = new HashMap<String, Button>();
 
 	// Area in pixel of the diagram
 	int sum = 0;
@@ -30,46 +33,67 @@ public class TestSquarification extends PApplet {
 	int h = 700;
 
 	// Buttons
-	//Button b1;
-	//Button b2;
-	
-	// Boolean
-	boolean first = false;
-	
+	Button b1;
+
 	int dimX;
 	int dimY;
 
+	boolean redraw = false;
+
+	public void parse() throws Exception {
+
+		DBConnector conn = DBConnector.getInstance();
+		conn.init();
+
+		Parser p = new Parser("data.csv");
+		p.open();
+		p.parse();
+	}
+
+	public void addButtons() {
+		buttons.put("male", new Button("Male", this));
+		buttons.put("female", new Button("Female", this));
+	}
+
 	public void setup() {
-		size(w, h);
-		smooth();
-		background(255);
 
-		//b1 = new Button("Ausländer", 20, 20, this);
-		//b2 = new Button("Deutsche", b1.dimX + 40, 20, this);
-
-		if (first == false) {
-			// Read data.
+		try {
+			parse();
 			getDBvalues();
-			first = true;
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 
-		int borderX = 100, borderY = 100;
+		size(w, h);
+		smooth();
+		noLoop();
+
+		addMouseMotionListener(new MouseMotionListener() {
+			@Override
+			public void mouseDragged(MouseEvent e) {
+			}
+			@Override
+			public void mouseMoved(MouseEvent e) {
+				redraw();
+			}
+		});
+
+		addButtons();
+
+		int borderX = 100;
+		int borderY = 100;
 
 		double dimX = w - 2 * borderX;
 		double dimY = h - 2 * borderY;
-		
-		double yS =Math.sqrt(((double)sum*dimY)/dimX);
-		double xS = sum/yS;
-
-		double trans = dimY/yS;
 
 		Squarification s = new Squarification();
-		s.getSquarify(rects, xS, yS);
+		s.getSquarify(rects, dimX, dimY);
 
 		for (int i = 0; i < rects.size(); i++) {
 			rects.get(i).setOffset(borderX, borderY);
-			rects.get(i).setTransformationRatios(trans);
 		}
+		
+		draw();
 	}
 
 	public void draw() {
@@ -80,70 +104,33 @@ public class TestSquarification extends PApplet {
 			rects.get(i).display();
 		}
 
-		for (int i = 0; i < rects.size(); i++) {
-			rects.get(i).mouseText();
-		}
+		for(Rectangle r : rects)
+			r.mouseText();
 
-		//b1.display();
+		// b1.display();
 	}
 
 	public void mouseClicked() {
-		rects.clear();
-		sum = 0;
-		//b1.mouseClicked();
-		//b2.mouseClicked();
+		// if (b1.mouseClicked()) {
+		// redraw = true;
+		//
+		// // reset erverything
+		// rects.clear();
+		// sum = 0;
+		// }
 	}
 
-	public void getDBvalues() {
+	public void getDBvalues() throws Exception {
 
-		try {
+		Statement selectStmt = DBConnector.getInstance().connection
+				.createStatement();
+		ResultSet rs = selectStmt
+				.executeQuery("select sum(number), name, category from straftat WHERE name <> 'Sonstiges' AND origin = 'A' GROUP BY name;");
 
-			DBConnector conn = DBConnector.getInstance();
-			conn.init();
-
-			Parser p = new Parser("data.csv");
-			p.open();
-			p.parse();
-
-			Statement selectStmt = conn.connection.createStatement();
-			ResultSet rs = selectStmt
-					.executeQuery("select sum(number), name, category from straftat WHERE name <> 'Sonstiges' AND origin = 'A' GROUP BY name;");
-
-			while (rs.next()) {
-				rects.add(new Rectangle(rs.getInt(1), rs.getString(2), rs
-						.getString(3).toCharArray()[0], this));
-				sum = sum + rs.getInt(1);
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-
-	public void getDBvalues2() {
-		try {
-
-			DBConnector conn = DBConnector.getInstance();
-			conn.init();
-
-			Parser p = new Parser("data.csv");
-			p.open();
-			p.parse();
-
-			Statement selectStmt = conn.connection.createStatement();
-			ResultSet rs = selectStmt
-					.executeQuery("select sum(number), name, category from straftat WHERE origin == 'A' AND name <> 'Sonstiges' GROUP BY name;");
-
-			while (rs.next()) {
-				rects.add(new Rectangle(rs.getInt(1), rs.getString(2), rs
-						.getString(3).toCharArray()[0], this));
-				sum = sum + rs.getInt(1);
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-		} catch (Exception e) {
-			e.printStackTrace();
+		while (rs.next()) {
+			rects.add(new Rectangle(rs.getInt(1), rs.getString(2), rs
+					.getString(3).toCharArray()[0], this));
+			sum = sum + rs.getInt(1);
 		}
 	}
 }

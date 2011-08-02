@@ -16,12 +16,9 @@ public class Rectangle implements RectInterface {
 	private String title;
 	private Color color = new Color(0xFF0000);
 
-	private int offsetX;
-	private int offsetY;
+	private int offsetX = 0;
+	private int offsetY = 0;
 	private static int margin = 2;
-
-	private double transX;
-	private double transY;
 
 	PApplet parent;
 
@@ -96,26 +93,20 @@ public class Rectangle implements RectInterface {
 
 	public void display() {
 		parent.fill(color.getRed(), color.getGreen(), color.getBlue());
-		parent.rect((float) (startX * transX + margin), (float) (startY
-				* transY + margin), (float) (dimX * transX - 2 * margin),
-				(float) (dimY * transY - 2 * margin));
+		parent.rect((float) (startX + margin), (float) (startY + margin), 
+				(float) (dimX - 2 * margin),
+				(float) (dimY - 2 * margin));
 	}
 
 	public void mouseText() {
-		if (parent.mouseX > startX * transX
-				&& parent.mouseX < startX * transY + dimX * transX
-				&& parent.mouseY > startY * transY
-				&& parent.mouseY < startY * transY + dimY * transY) {
+		if (parent.mouseX > startX
+				&& parent.mouseX < startX + dimX
+				&& parent.mouseY > startY 
+				&& parent.mouseY < startY + dimY) {
 			parent.fill(0);
 			PFont f = parent.createFont("FFScala", 20);
 			parent.textFont(f);
 			parent.text(title, parent.mouseX, parent.mouseY);
 		}
-	}
-
-	public void setTransformationRatios(double trans) {
-		this.transX = trans; // TODO: reicht ein trans ohne X/Y
-		this.transY = trans;
-
 	}
 }
