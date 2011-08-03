@@ -3,12 +3,10 @@ package gui;
 import java.awt.Color;
 
 import processing.core.PApplet;
-import testing.TestSquarification;
-
 public class Button {
 
 	public int dimX = 100;
-	public int dimY = 50;
+	public int dimY = 35;
 	public int startX;
 	public int startY;
 
@@ -42,6 +40,7 @@ public class Button {
 		}
 		parent.fill(drawColor.getRed(), drawColor.getGreen(), drawColor.getBlue());
 		parent.rect(startX, startY, dimX, dimY);
+		parent.text(title, startX, startY);
 	}
 
 	public boolean mouseClicked() {

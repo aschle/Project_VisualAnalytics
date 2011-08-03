@@ -5,7 +5,6 @@ import java.awt.event.MouseMotionListener;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.HashMap;
 
 import database.DBConnector;
 import database.Parser;
@@ -13,13 +12,16 @@ import processing.core.PApplet;
 import squarification.Squarification;
 import gui.Button;
 import gui.Rectangle;
+import guicomponents.GButton;
 
 public class TestSquarification extends PApplet {
 
 	private static final long serialVersionUID = 1L;
 
 	ArrayList<Rectangle> rects = new ArrayList<Rectangle>();
-	HashMap<String, Button> buttons = new HashMap<String, Button>();
+
+	Button male = new Button("Male", 10, 10, this);
+	Button female = new Button("Female", 10, 70, this);
 
 	// Area in pixel of the diagram
 	int sum = 0;
@@ -50,11 +52,6 @@ public class TestSquarification extends PApplet {
 		p.parse();
 	}
 
-	public void addButtons() {
-		buttons.put("male", new Button("Male", this));
-		buttons.put("female", new Button("Female", this));
-	}
-
 	public void setup() {
 
 		try {
@@ -72,13 +69,12 @@ public class TestSquarification extends PApplet {
 			@Override
 			public void mouseDragged(MouseEvent e) {
 			}
+
 			@Override
 			public void mouseMoved(MouseEvent e) {
 				redraw();
 			}
 		});
-
-		addButtons();
 
 		int borderX = 100;
 		int borderY = 100;
@@ -92,7 +88,7 @@ public class TestSquarification extends PApplet {
 		for (int i = 0; i < rects.size(); i++) {
 			rects.get(i).setOffset(borderX, borderY);
 		}
-		
+
 		draw();
 	}
 
@@ -100,25 +96,22 @@ public class TestSquarification extends PApplet {
 		background(255);
 		noStroke();
 
-		for (int i = 0; i < rects.size(); i++) {
+		for (int i = 0; i < rects.size(); i++)
 			rects.get(i).display();
-		}
 
-		for(Rectangle r : rects)
+		for (Rectangle r : rects)
 			r.mouseText();
 
-		// b1.display();
-	}
+		male.display();
+		female.display();
 
-	public void mouseClicked() {
-		// if (b1.mouseClicked()) {
-		// redraw = true;
-		//
-		// // reset erverything
-		// rects.clear();
-		// sum = 0;
-		// }
 	}
+	
+	public void mouseClicked() {
+		 male.mouseClicked();
+		 female.mouseClicked();
+		 redraw();
+		}
 
 	public void getDBvalues() throws Exception {
 
