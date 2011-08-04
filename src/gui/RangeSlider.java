@@ -16,14 +16,22 @@ public class RangeSlider {
 
 	// Scale
 	private int sH = 8;
-	private int sW = 150;
+	private int sW = 250;
 	private Color sColor = new Color(100, 100, 100);
 
 	// Ticks
 	private int tH = 25;
-	private int tW = 25;
+	private int tW = 15;
 	private Color tColor = new Color(200, 200, 200);
 	private int tickNumber;
+	private int tickDistance;
+
+	// StickPoints (x value of the stick points)
+	private int[] stickPArray;
+
+	// TicksStartPoints (x value where to start drawing the ticks)
+	private int[] ticksXArray;
+	private int startYT;
 
 	// Bar to slide around
 	private int bH = 20;
@@ -31,53 +39,76 @@ public class RangeSlider {
 	private Color bColorInactive = new Color(50, 50, 50);
 	private Color bColorActive = new Color(255, 210, 0);
 
-	// Range of the Bar
-	private int currentStartBXLeft; // this one moves around
-	private int currentStartBXRight; // this one moves arou
-	private int startBXLeft;
-	private int startBXRight;
-	private int startBY;
+	private int currentBarLeft;
+	private int currentBarRight;
+	private int barY;
 
+	private int[] barPosition;
+
+	// Range
+	private int currentRangeX;
+	private int rangeY;
+	private int currentRangeW;
+	private int rangeH = 3;
+	private Color rangeColor = new Color(255, 180, 0);
+
+	// State to keep track if a bar is active or not
 	private boolean activeLeft = false;
 	private boolean activeRight = false;
 
-	// StickPoints
-	private int stickP1;
-	private int stickP2;
-	private int stickP3;
-
 	// States
-	private boolean[] state = { false, true, false };
-	private String[] stateLabel = { "male", "all", "female" };
+	private boolean[] state;
+	private String[] stateLabel;
+
+	private boolean samePosition = false;
 
 	private PApplet parent;
 
-	public TrinärSlider(int startX, int startY, PApplet parent) {
+	public RangeSlider(int startX, int startY, int tickNumber,
+			String[] stateLabel, PApplet parent) {
 
 		this.startX = startX;
 		this.startY = startY;
 		this.parent = parent;
+		this.tickNumber = tickNumber;
+		this.stateLabel = stateLabel;
 
-		// calculate Sticky Points
-		// -|----|----|-
-		// P1 P1 P3
-		stickP1 = startX + border;
-		stickP2 = startX + sW / 2;
-		stickP3 = startX + sW - border;
+		tickDistance = (sW - 2 * border) / (tickNumber - 1);
+		stickPArray = new int[tickNumber];
+		ticksXArray = new int[tickNumber];
+		barPosition = new int[tickNumber];
+		state = new boolean[tickNumber];
 
-		// start points for the ticks
-		// -|_|----|_|----|_|-
-		startXT1 = stickP1 - tW / 2;
-		startXT2 = stickP2 - tW / 2;
-		startXT3 = stickP3 - tW / 2;
+		// calculate Sticky Points (x)
+		// -|----|----|--..--|-
+		// P1 P2 .. PN
+		for (int i = 0; i < tickNumber; i++) {
+			stickPArray[i] = startX + border + i * tickDistance;
+		}
+
+		// start points for the ticks (x|y)
+		// -|_|----|_|----|_|--..--|_|-
+
+		for (int i = 0; i < tickNumber; i++) {
+			ticksXArray[i] = stickPArray[i] - tW / 2;
+		}
+
 		startYT = startY - (tH - sH) / 2;
 
-		// start points for the bar
-		startBX = stickP1 - bW / 2;
-		startBY = startY - (bH - sH) / 2;
+		// bars
+		for (int i = 0; i < tickNumber; i++) {
+			barPosition[i] = stickPArray[i] - bW / 2;
+		}
 
-		// start by default in the middle
-		currentStartBX = stickP2 - bW / 2;
+		currentBarLeft = 0;
+		currentBarRight = tickNumber - 1;
+		barY = startY - (bH - sH) / 2;
+
+		// range
+		currentRangeW = stickPArray[tickNumber - 1] - stickPArray[0];
+		currentRangeX = stickPArray[0];
+		rangeY = startY + sH / 2 - rangeH / 2;
+
 	}
 
 	public void display() {
@@ -89,99 +120,180 @@ public class RangeSlider {
 		// Label the ticks
 		setColor(new Color(0));
 		parent.textAlign(PConstants.CENTER);
-		parent.text(stateLabel[0], stickP1, startYT - 5);
-		parent.text(stateLabel[1], stickP2, startYT - 5);
-		parent.text(stateLabel[2], stickP3, startYT - 5);
-		
+		for (int i = 0; i < tickNumber; i++) {
+			parent.text(stateLabel[i], stickPArray[i], startYT - 5);
+		}
+
 		// Ticks
 		setColor(tColor);
-		roundRect(startXT1, startYT, tW, tH);
-		roundRect(startXT2, startYT, tW, tH);
-		roundRect(startXT3, startYT, tW, tH);
-		
+		for (int i = 0; i < tickNumber; i++) {
+			roundRect(ticksXArray[i], startYT, tW, tH);
+		}
+
 		// Scale
 		setColor(sColor);
 		roundRect(startX, startY, sW, sH);
 
-		// Bar
-		if (active) {
+		// Range
+		setColor(rangeColor);
+		parent.rect(currentRangeX, rangeY, currentRangeW, rangeH);
+
+		// Bar LEFT
+		if (activeLeft) {
 			setColor(bColorActive);
 		} else {
 			setColor(bColorInactive);
 		}
 		parent.ellipseMode(PConstants.CORNER);
-		parent.ellipse(currentStartBX, startBY, bW, bH);
+		parent.ellipse(barPosition[currentBarLeft], barY, bW, bH);
+
+		// Bar RIGHT
+		if (activeRight) {
+			setColor(bColorActive);
+		} else {
+			setColor(bColorInactive);
+		}
+		parent.ellipseMode(PConstants.CORNER);
+		parent.ellipse(barPosition[currentBarRight], barY, bW, bH);
+
 	}
 
 	public void moveBar() {
 
-		if (active) {
-
-			if (closeToP1()) {
-				currentStartBX = startBX;
-				state[0] = true;
-				state[1] = false;
-				state[2] = false;
-			}
-
-			if (closeToP2()) {
-				currentStartBX = stickP2 - bW / 2;
-				state[0] = false;
-				state[1] = true;
-				state[2] = false;
-			}
-
-			if (closeToP3()) {
-				currentStartBX = stickP3 - bW / 2;
-				state[0] = false;
-				state[1] = false;
-				state[2] = true;
-			}
+		if (isCloseLeft(stickPArray[0])) {
+			move(0);
 		}
+
+		if (isCloseRigth(stickPArray[tickNumber - 1])) {
+			move(tickNumber - 1);
+		}
+
+		int num = closeTo();
+		if (num != 0) {
+			move(num);
+		}
+
+		// if they are above each other
+		if (currentBarLeft == currentBarRight) {
+			samePosition = true;
+
+		} else {
+			samePosition = false;
+		}
+
+		// calculate new range
+		currentRangeW = barPosition[currentBarRight]
+				- barPosition[currentBarLeft];
+		currentRangeX = barPosition[currentBarLeft];
+
 	}
 
-	public boolean closeToP1() {
-		if (parent.mouseX < (stickP1 + (stickP2 - stickP1) / 2)) {
+	private int closeTo() {
+
+		int num = 0;
+
+		for (int i = 1; i < tickNumber - 1; i++) {
+
+			if (parent.mouseX > (stickPArray[i - 1] + (stickPArray[i] - stickPArray[i - 1]) / 2)
+					&& parent.mouseX < (stickPArray[i] + (stickPArray[i + 1] - stickPArray[i]) / 2)) {
+				num = i;
+
+			}
+		}
+		return num;
+	}
+
+	private void move(int value) {
+
+		if (activeLeft) {
+			currentBarLeft = value;
+		}
+
+		if (activeRight) {
+			currentBarRight = value;
+		}
+
+		setStates();
+
+	}
+
+	public void setStates() {
+		int min = 0;
+		int max = tickNumber - 1;
+
+		if (currentBarLeft < currentBarRight) {
+			min = currentBarLeft;
+			max = currentBarRight;
+		} else {
+			min = currentBarRight;
+			max = currentBarLeft;
+		}
+
+		for (int i = 0; i < tickNumber; i++) {
+			if (i >= min && i <= max) {
+				state[i] = true;
+			} else {
+				state[i] = false;
+			}
+
+		}
+
+		for (int i = 0; i < tickNumber; i++) {
+			parent.print(state[i] + " ");
+		}
+
+		parent.println("\n");
+	}
+
+	private boolean isCloseLeft(int stickPX) {
+		if (parent.mouseX < (stickPX + (stickPArray[1] - stickPX) / 2)) {
 			return true;
 		} else {
 			return false;
 		}
 	}
 
-	public boolean closeToP2() {
-		if (parent.mouseX > (stickP1 + (stickP2 - stickP1) / 2)
-				&& parent.mouseX < (stickP2 + (stickP3 - stickP2) / 2)) {
+	private boolean isCloseRigth(int stickPX) {
+		if (parent.mouseX > (stickPArray[tickNumber - 1] + (stickPX - stickPArray[tickNumber - 1]) / 2)) {
 			return true;
 
 		} else {
 			return false;
 		}
-	}
-
-	public boolean closeToP3() {
-		if (parent.mouseX > (stickP2 + (stickP3 - stickP2) / 2)) {
-			return true;
-
-		} else {
-			return false;
-		}
-
 	}
 
 	public void mousePressed() {
-		if (isInBar()) {
-			active = true;
+
+		if (samePosition) {
+
+			if (isInBar(currentBarLeft)) {
+				activeLeft = true;
+			}
+			return;
+		}
+
+		if (isInBar(currentBarLeft)) {
+			activeLeft = true;
+		}
+
+		if (isInBar(currentBarRight)) {
+			activeRight = true;
 		}
 	}
 
 	public void mouseReleased() {
-		active = false;
+		if (activeLeft) {
+			activeLeft = false;
+		}
+		if (activeRight) {
+			activeRight = false;
+		}
 	}
 
-	private boolean isInBar() {
-		if (parent.mouseX > currentStartBX
-				&& parent.mouseX < currentStartBX + bW
-				&& parent.mouseY > startBY && parent.mouseY < startBY + bH) {
+	private boolean isInBar(int startX) {
+		if (parent.mouseX > barPosition[startX]
+				&& parent.mouseX < barPosition[startX] + bW
+				&& parent.mouseY > barY && parent.mouseY < barY + bH) {
 			return true;
 		} else {
 			return false;

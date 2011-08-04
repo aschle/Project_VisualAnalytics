@@ -209,5 +209,4 @@ public class TrinärSlider {
 		parent.curveVertex(x + w + midDisp, y + h / 2f);
 		parent.endShape();
 	}
-
 }
