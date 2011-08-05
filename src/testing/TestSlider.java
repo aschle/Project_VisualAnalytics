@@ -1,32 +1,33 @@
 package testing;
 
-import gui.TrinärSlider;
+import gui.TernarySlider;
 import processing.core.PApplet;
 
 public class TestSlider extends PApplet {
 
 	private static final long serialVersionUID = 1L;
-	TrinärSlider slider;
-	
+	TernarySlider slider;
+
 	public void setup() {
 		size(500, 500);
 		background(255);
-		slider = new TrinärSlider(50, 50, this);
+		String[] labels = { "male", "all", "female" };
+		slider = new TernarySlider(50, 50, labels, this);
 	}
 
 	public void draw() {
 		slider.display();
 	}
-	
-	public void mouseDragged(){
+
+	public void mouseDragged() {
 		slider.moveBar();
 	}
-	
-	public void mousePressed(){
+
+	public void mousePressed() {
 		slider.mousePressed();
 	}
-	
-	public void mouseReleased(){
+
+	public void mouseReleased() {
 		slider.mouseReleased();
 	}
 }

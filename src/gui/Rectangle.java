@@ -3,6 +3,7 @@ package gui;
 import java.awt.Color;
 
 import processing.core.PApplet;
+import processing.core.PConstants;
 import processing.core.PFont;
 import squarification.RectInterface;
 
@@ -93,19 +94,17 @@ public class Rectangle implements RectInterface {
 
 	public void display() {
 		parent.fill(color.getRed(), color.getGreen(), color.getBlue());
-		parent.rect((float) (startX + margin), (float) (startY + margin), 
-				(float) (dimX - 2 * margin),
-				(float) (dimY - 2 * margin));
+		parent.rect((float) (startX + margin), (float) (startY + margin),
+				(float) (dimX - 2 * margin), (float) (dimY - 2 * margin));
 	}
 
 	public void mouseText() {
-		if (parent.mouseX > startX
-				&& parent.mouseX < startX + dimX
-				&& parent.mouseY > startY 
-				&& parent.mouseY < startY + dimY) {
+		if (parent.mouseX > startX && parent.mouseX < startX + dimX
+				&& parent.mouseY > startY && parent.mouseY < startY + dimY) {
 			parent.fill(0);
 			PFont f = parent.createFont("FFScala", 20);
 			parent.textFont(f);
+			parent.textAlign(PConstants.CENTER);
 			parent.text(title, parent.mouseX, parent.mouseY);
 		}
 	}

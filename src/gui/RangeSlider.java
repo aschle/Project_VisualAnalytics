@@ -6,6 +6,9 @@ import processing.core.PApplet;
 import processing.core.PConstants;
 
 public class RangeSlider {
+	
+	// Rounded Corners
+	private int r = 10;
 
 	// StartingPoint of the Slider (upper left corner of the scale)
 	private int startX;
@@ -15,13 +18,13 @@ public class RangeSlider {
 	private int border = 20;
 
 	// Scale
-	private int sH = 8;
-	private int sW = 250;
+	private int sH = 10;
+	private int sW = 440;
 	private Color sColor = new Color(100, 100, 100);
 
 	// Ticks
 	private int tH = 25;
-	private int tW = 15;
+	private int tW = 25;
 	private Color tColor = new Color(200, 200, 200);
 	private int tickNumber;
 	private int tickDistance;
@@ -49,7 +52,7 @@ public class RangeSlider {
 	private int currentRangeX;
 	private int rangeY;
 	private int currentRangeW;
-	private int rangeH = 3;
+	private int rangeH = 10;
 	private Color rangeColor = new Color(255, 180, 0);
 
 	// State to keep track if a bar is active or not
@@ -113,12 +116,9 @@ public class RangeSlider {
 
 	public void display() {
 
-		parent.smooth();
-		parent.background(255);
-		parent.noStroke();
-
 		// Label the ticks
 		setColor(new Color(0));
+		parent.textSize(14);
 		parent.textAlign(PConstants.CENTER);
 		for (int i = 0; i < tickNumber; i++) {
 			parent.text(stateLabel[i], stickPArray[i], startYT - 5);
@@ -127,12 +127,12 @@ public class RangeSlider {
 		// Ticks
 		setColor(tColor);
 		for (int i = 0; i < tickNumber; i++) {
-			roundRect(ticksXArray[i], startYT, tW, tH);
+			roundRect(ticksXArray[i], startYT, tW, tH, r, r);
 		}
 
 		// Scale
 		setColor(sColor);
-		roundRect(startX, startY, sW, sH);
+		roundRect(startX, startY, sW, sH, r, r);
 
 		// Range
 		setColor(rangeColor);
@@ -184,7 +184,8 @@ public class RangeSlider {
 		// calculate new range
 		currentRangeW = barPosition[currentBarRight]
 				- barPosition[currentBarLeft];
-		currentRangeX = barPosition[currentBarLeft];
+		parent.println("CBL " +currentBarLeft);
+		currentRangeX = stickPArray[currentBarLeft];
 
 	}
 
@@ -237,12 +238,6 @@ public class RangeSlider {
 			}
 
 		}
-
-		for (int i = 0; i < tickNumber; i++) {
-			parent.print(state[i] + " ");
-		}
-
-		parent.println("\n");
 	}
 
 	private boolean isCloseLeft(int stickPX) {
@@ -304,22 +299,32 @@ public class RangeSlider {
 		parent.fill(c.getRed(), c.getGreen(), c.getBlue());
 	}
 
-	void roundRect(float x, float y, float w, float h) {
-		float corner = w / 10f;
-		float midDisp = w / 20f;
-
+	void roundRect(float x, float y, float w, float h, float rx, float ry) {
 		parent.beginShape();
-		parent.curveVertex(x + corner, y);
-		parent.curveVertex(x + w - corner, y);
-		parent.curveVertex(x + w + midDisp, y + h / 2f);
-		parent.curveVertex(x + w - corner, y + h);
-		parent.curveVertex(x + corner, y + h);
-		parent.curveVertex(x - midDisp, y + h / 2f);
+		parent.vertex(x, y + ry); // top of left side
+		parent.bezierVertex(x, y, x, y, x + rx, y); // top left corner
 
-		parent.curveVertex(x + corner, y);
-		parent.curveVertex(x + w - corner, y);
-		parent.curveVertex(x + w + midDisp, y + h / 2f);
-		parent.endShape();
+		parent.vertex(x + w - rx, y); // right of top side
+		parent.bezierVertex(x + w, y, x + w, y, x + w, y + ry); // top right
+																// corner
+
+		parent.vertex(x + w, y + h - ry); // bottom of right side
+		parent.bezierVertex(x + w, y + h, x + w, y + h, x + w - rx, y + h); // bottom
+		// right
+
+		parent.vertex(x + rx, y + h); // left of bottom side
+		parent.bezierVertex(x, y + h, x, y + h, x, y + h - ry); // bottom left
+																// corner
+
+		parent.endShape(PConstants.CLOSE);
+	}
+
+	public void setsW(int sW) {
+		this.sW = sW;
+	}
+
+	public int getsW() {
+		return sW;
 	}
 
 }

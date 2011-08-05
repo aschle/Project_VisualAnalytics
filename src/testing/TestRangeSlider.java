@@ -11,8 +11,8 @@ public class TestRangeSlider extends PApplet {
 	public void setup() {
 		size(400, 150);
 		background(255);
-		String[] labels = { "2007", "2008", "2009", "2010" };
-		slider = new RangeSlider(50, 50, 4, labels, this);
+		String[] labels = { "2007", "2008", "2009", "2010", "2011", "2012", "2012" };
+		slider = new RangeSlider(50, 50, 7, labels, this);
 	}
 
 	public void draw() {

@@ -5,18 +5,34 @@ import java.awt.Color;
 import processing.core.PApplet;
 import processing.core.PConstants;
 
-public class TrinärSlider {
+/**
+ * The TernarySlider is a Slider with 3 discrete steps. It consists of a scale,
+ * ticks and the bar, which is moved around. The starting point of the slider is
+ * the upper left corner of the scale. You can configure the slider, which
+ * means: * the dimension of the slider itself is done by change the dimension
+ * of the scale * dimension of the ticks, and bar * colors of scale and ticks *
+ * active/inactive color of the bar * roundness * border (where the ticks
+ * start/end)
+ * 
+ * @author Alexa Schlegel
+ * 
+ */
+public class TernarySlider {
+
+	// Rounded Corners
+	private int r = 10;
 
 	// StartingPoint of the Slider (upper left corner of the scale)
 	private int startX;
 	private int startY;
 
-	// Border (before the ticks start/end
+	// Border (before the ticks start/end)
 	private int border = 20;
 
 	// Scale
-	private int sH = 8;
-	private int sW = 150;
+	private int sH = 10;
+
+	private int sW = 200;
 	private Color sColor = new Color(100, 100, 100);
 
 	// Ticks
@@ -48,15 +64,18 @@ public class TrinärSlider {
 
 	// States
 	private boolean[] state = { false, true, false };
-	private String[] stateLabel = { "male", "all", "female" };
+	private String[] stateLabel;
 
 	private PApplet parent;
 
-	public TrinärSlider(int startX, int startY, PApplet parent) {
+	public TernarySlider(int startX, int startY, String[] stateLabel,
+			PApplet parent) {
 
 		this.startX = startX;
 		this.startY = startY;
 		this.parent = parent;
+
+		this.stateLabel = stateLabel;
 
 		// calculate Sticky Points
 		// -|----|----|-
@@ -82,26 +101,23 @@ public class TrinärSlider {
 
 	public void display() {
 
-		parent.smooth();
-		parent.background(255);
-		parent.noStroke();
-
 		// Label the ticks
 		setColor(new Color(0));
+		parent.textSize(14);
 		parent.textAlign(PConstants.CENTER);
 		parent.text(stateLabel[0], stickP1, startYT - 5);
 		parent.text(stateLabel[1], stickP2, startYT - 5);
 		parent.text(stateLabel[2], stickP3, startYT - 5);
-		
+
 		// Ticks
 		setColor(tColor);
-		roundRect(startXT1, startYT, tW, tH);
-		roundRect(startXT2, startYT, tW, tH);
-		roundRect(startXT3, startYT, tW, tH);
-		
+		roundRect(startXT1, startYT, tW, tH, r, r);
+		roundRect(startXT2, startYT, tW, tH, r, r);
+		roundRect(startXT3, startYT, tW, tH, r, r);
+
 		// Scale
 		setColor(sColor);
-		roundRect(startX, startY, sW, sH);
+		roundRect(startX, startY, sW, sH, r, r);
 
 		// Bar
 		if (active) {
@@ -192,21 +208,31 @@ public class TrinärSlider {
 		parent.fill(c.getRed(), c.getGreen(), c.getBlue());
 	}
 
-	void roundRect(float x, float y, float w, float h) {
-		float corner = w / 10f;
-		float midDisp = w / 20f;
-
+	void roundRect(float x, float y, float w, float h, float rx, float ry) {
 		parent.beginShape();
-		parent.curveVertex(x + corner, y);
-		parent.curveVertex(x + w - corner, y);
-		parent.curveVertex(x + w + midDisp, y + h / 2f);
-		parent.curveVertex(x + w - corner, y + h);
-		parent.curveVertex(x + corner, y + h);
-		parent.curveVertex(x - midDisp, y + h / 2f);
+		parent.vertex(x, y + ry); // top of left side
+		parent.bezierVertex(x, y, x, y, x + rx, y); // top left corner
 
-		parent.curveVertex(x + corner, y);
-		parent.curveVertex(x + w - corner, y);
-		parent.curveVertex(x + w + midDisp, y + h / 2f);
-		parent.endShape();
+		parent.vertex(x + w - rx, y); // right of top side
+		parent.bezierVertex(x + w, y, x + w, y, x + w, y + ry); // top right
+																// corner
+
+		parent.vertex(x + w, y + h - ry); // bottom of right side
+		parent.bezierVertex(x + w, y + h, x + w, y + h, x + w - rx, y + h); // bottom
+		// right
+
+		parent.vertex(x + rx, y + h); // left of bottom side
+		parent.bezierVertex(x, y + h, x, y + h, x, y + h - ry); // bottom left
+																// corner
+
+		parent.endShape(PConstants.CLOSE);
+	}
+
+	public void setsW(int sW) {
+		this.sW = sW;
+	}
+
+	public int getsW() {
+		return sW;
 	}
 }
