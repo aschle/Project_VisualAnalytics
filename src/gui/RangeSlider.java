@@ -6,7 +6,7 @@ import processing.core.PApplet;
 import processing.core.PConstants;
 
 public class RangeSlider {
-	
+
 	// Rounded Corners
 	private int r = 10;
 
@@ -25,7 +25,7 @@ public class RangeSlider {
 	// Ticks
 	private int tH = 25;
 	private int tW = 25;
-	private Color tColor = new Color(200, 200, 200);
+	private Color tColor = new Color(180, 180, 180);
 	private int tickNumber;
 	private int tickDistance;
 
@@ -39,8 +39,8 @@ public class RangeSlider {
 	// Bar to slide around
 	private int bH = 20;
 	private int bW = 20;
-	private Color bColorInactive = new Color(50, 50, 50);
-	private Color bColorActive = new Color(255, 210, 0);
+	private Color bColorInactive = new Color(0x339900);
+	private Color bColorActive = new Color(0x7DCC00);
 
 	private int currentBarLeft;
 	private int currentBarRight;
@@ -52,8 +52,8 @@ public class RangeSlider {
 	private int currentRangeX;
 	private int rangeY;
 	private int currentRangeW;
-	private int rangeH = 10;
-	private Color rangeColor = new Color(255, 180, 0);
+	private int rangeH = 4;
+	private Color rangeColor = new Color(0xCE0000);
 
 	// State to keep track if a bar is active or not
 	private boolean activeLeft = false;
@@ -81,6 +81,10 @@ public class RangeSlider {
 		ticksXArray = new int[tickNumber];
 		barPosition = new int[tickNumber];
 		state = new boolean[tickNumber];
+
+		for (int i = 0; i < tickNumber; i++) {
+			state[i] = true;
+		}
 
 		// calculate Sticky Points (x)
 		// -|----|----|--..--|-
@@ -184,7 +188,6 @@ public class RangeSlider {
 		// calculate new range
 		currentRangeW = barPosition[currentBarRight]
 				- barPosition[currentBarLeft];
-		parent.println("CBL " +currentBarLeft);
 		currentRangeX = stickPArray[currentBarLeft];
 
 	}
@@ -219,6 +222,7 @@ public class RangeSlider {
 	}
 
 	public void setStates() {
+
 		int min = 0;
 		int max = tickNumber - 1;
 
@@ -277,6 +281,7 @@ public class RangeSlider {
 	}
 
 	public void mouseReleased() {
+		System.out.println("rangeslieder mouse Released");
 		if (activeLeft) {
 			activeLeft = false;
 		}
@@ -327,4 +332,7 @@ public class RangeSlider {
 		return sW;
 	}
 
+	public boolean[] getState() {
+		return state;
+	}
 }

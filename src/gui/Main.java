@@ -1,71 +1,43 @@
 package gui;
 
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseMotionListener;
 import java.io.File;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
+
+import javax.swing.border.TitledBorder;
 
 import database.DBConnector;
 import database.Parser;
-import database.Querying;
-
 import processing.core.PApplet;
-import squarification.Squarification;
 
-/**
- * This is the main class, which presents the main visualization.
- * 
- * @author Alexa Schlegel
- * 
- */
 public class Main extends PApplet {
 
-	private static final long serialVersionUID = 1L;
-
-	// Slider
-	TernarySlider genderSlider;
-	TernarySlider originSlider;
-	RangeSlider ageSlider;
-
-	// Offset to center the diagram
-	int offsetX;
-	int offsetY;
-
-	// Dimension of the whole area
-	int w = 1000;
-	int h = 700;
-
-	// Dimension of the diagram area
-	double dimX;
-	double dimY;
-
-	// Dimension of the slider area
-	int dimSliderX;
-	int dimSliderY;
-
-	int startSliderAreaX;
-	int startSliderAreaY;
-
-	// Borders
-	int borderX = 100;
-	int borderYtop = 100;
-	int boderYbottom = 50;
-
-	// Space between diagram and slider
-	int space = 5;
+	private static final long serialVersionUID = -6818220594093253964L;
 
 	// File
 	File file;
 
-	// Rectangles
-	ArrayList<Rectangle> rects = new ArrayList<Rectangle>();
+	// Height and Width of the whole area
+	int w;
+	int h;
 
-	// Total Sum
-	int sum;
+	// Diagrams (left and right)
+	Diagram dia1;
+	Diagram dia2;
+
+	// Dimension of the diagram
+	int diaW;
+	int diaH;
+
+	// Borders (half the display area)
+	int borderXleft = 25;
+	int borderXright = 20;
+	int borderYbottom = 50;
+	int borderYtop = 70;
 
 	public void setup() {
+
+		// fill the whole screen
+		w = screenWidth;
+		h = screenHeight;
 
 		// if there is no DB file, parse the file into the DB
 		file = new File("statistik.db");
@@ -88,127 +60,96 @@ public class Main extends PApplet {
 			}
 		}
 
-		// load the initial data
-		try {
-			loadData();
-		} catch (Exception e) {
-			System.out.println("Error, while loading date from the DB.");
-			e.printStackTrace();
-			System.exit(1);
-		}
-
-		// calculate all borders and areas
-		dimX = w - 2 * borderX;
-		int dimYTmp = h - borderYtop - boderYbottom;
-		dimY = (dimYTmp / 8) * 6;
-
-		dimSliderX = (int) dimX - 4;
-		dimSliderY = (int) (dimYTmp - dimY - 4);
-
-		startSliderAreaX = borderX + 2;
-		startSliderAreaY = (int) (borderYtop + dimY + space);
-
 		smooth();
+
+		// for saving some useless drawing
 		noLoop();
-		addListener();
-		setupSlider();
 		size(w, h);
 
-		Squarification s = new Squarification();
-		s.getSquarify(rects, dimX, dimY);
+		diaW = w / 2 - borderXleft - borderXright;
+		diaH = h - borderYtop - borderYbottom;
 
-		for (int i = 0; i < rects.size(); i++) {
-			rects.get(i).setOffset(borderX, borderYtop);
-		}
-
-		draw();
+		dia1 = new Diagram(diaW, diaH, this);
+		dia2 = new Diagram(diaW, diaH, this);
+		dia2.setOffset(w / 2 + borderXleft, 0);
+		dia1.setup();
+		dia2.setup();
 	}
 
 	public void draw() {
-
 		background(255);
 		noStroke();
 
-		fill(220);
-		// draw slider ares
-		rect(startSliderAreaX, startSliderAreaY, dimSliderX, dimSliderY - 2
-				* space);
-
-		genderSlider.display();
-		originSlider.display();
-		ageSlider.display();
-
-		for (int i = 0; i < rects.size(); i++)
-			rects.get(i).display();
-
-		for (Rectangle r : rects)
-			r.mouseText();
+		dia1.display();
+		dia2.display();
 	}
 
+	/**
+	 * This is important for the sliders. To move the bars of the slider.
+	 */
 	public void mouseDragged() {
-		genderSlider.moveBar();
-		originSlider.moveBar();
-		ageSlider.moveBar();
-	}
+		if (isInArea(dia1.startSliderAreaX, dia1.startSliderAreaY,
+				dia1.dimSliderX, dia1.dimSliderY)) {
+			dia1.mouseDragged();
+		}
 
-	public void mousePressed() {
-		genderSlider.mousePressed();
-		originSlider.mousePressed();
-		ageSlider.mousePressed();
-	}
-
-	public void mouseReleased() {
-		genderSlider.mouseReleased();
-		originSlider.mouseReleased();
-		ageSlider.mouseReleased();
-	}
-
-	private void setupSlider() {
-
-		int sliderBorderTop = 40;
-		int sliderBorderLeft = 20;
-		int startXgender = startSliderAreaX + sliderBorderLeft;
-		int startYgender = startSliderAreaY + sliderBorderTop;
-		String[] labelGender = { "male", "all", "female" };
-		String[] labelOrigin = { "German", "all", "Alien" };
-		String[] labelAge = { "14-18", "18-21", "21-25", "25-30", "30-40",
-				"40-50", "50+" };
-
-		ageSlider = new RangeSlider(startXgender, startYgender
-				+ (int)(1.5*sliderBorderTop), 7, labelAge, this);
-
-		genderSlider = new TernarySlider(startXgender, startYgender,
-				labelGender, this);
-
-		originSlider = new TernarySlider(startXgender + genderSlider.getsW()
-				+ 2 * sliderBorderLeft, startYgender, labelOrigin, this);
-
-	}
-
-	private void addListener() {
-
-		addMouseMotionListener(new MouseMotionListener() {
-			@Override
-			public void mouseDragged(MouseEvent e) {
-				redraw();
-			}
-
-			@Override
-			public void mouseMoved(MouseEvent e) {
-				redraw();
-			}
-		});
-	}
-
-	private void loadData() throws Exception {
-
-		ResultSet rs = Querying.getInitialDBvalues();
-
-		while (rs.next()) {
-			rects.add(new Rectangle(rs.getInt(1), rs.getString(2), rs
-					.getString(3).toCharArray()[0], this));
-			sum = sum + rs.getInt(1);
+		if (isInArea(dia2.startSliderAreaX, dia2.startSliderAreaY,
+				dia2.dimSliderX, dia2.dimSliderY)) {
+			dia2.mouseDragged();
 		}
 	}
 
+	/**
+	 * This is importaint for activating a slider bar.
+	 */
+	public void mousePressed() {
+
+		if (isInArea(dia1.startSliderAreaX, dia1.startSliderAreaY,
+				dia1.dimSliderX, dia1.dimSliderY)) {
+			dia1.mousePressed();
+		}
+
+		if (isInArea(dia2.startSliderAreaX, dia2.startSliderAreaY,
+				dia2.dimSliderX, dia2.dimSliderY)) {
+			dia2.mousePressed();
+		}
+	}
+
+	/**
+	 * This is important for unactivating a slider bar. And for showing more
+	 * info inside the rectangles.
+	 */
+	public void mouseReleased() {
+
+		if (isInArea(dia1.areaSartX, dia1.areaStartY, (int) dia1.w,
+				(int) dia1.h)) {
+			dia1.mouseReleased();
+		}
+
+		if (isInArea(dia2.areaSartX, dia2.areaStartY, (int) dia2.w,
+				(int) dia2.h)) {
+			dia2.mouseReleased();
+		}
+	}
+
+	/**
+	 * Check if a mouse event was in a ceratin area. For checking if it was
+	 * inside the right or left diagram.
+	 * 
+	 * @param x
+	 *            x position of the starting point
+	 * @param y
+	 *            y position of the starting point
+	 * @param w
+	 *            with of the area
+	 * @param h
+	 *            heigth of the area
+	 * @return
+	 */
+	private boolean isInArea(int x, int y, int w, int h) {
+		if (mouseX > x && mouseX < x + w && mouseY > y && mouseY < y + h) {
+			return true;
+		} else
+			return false;
+	}
 }

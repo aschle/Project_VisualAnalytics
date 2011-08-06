@@ -32,13 +32,13 @@ public class TernarySlider {
 	// Scale
 	private int sH = 10;
 
-	private int sW = 200;
+	private int sW = 170;
 	private Color sColor = new Color(100, 100, 100);
 
 	// Ticks
 	private int tH = 25;
 	private int tW = 25;
-	private Color tColor = new Color(200, 200, 200);
+	private Color tColor = new Color(180, 180, 180);
 	private int startXT1;
 	private int startXT2;
 	private int startXT3;
@@ -47,8 +47,8 @@ public class TernarySlider {
 	// Bar to slide around
 	private int bH = 20;
 	private int bW = 20;
-	private Color bColorInactive = new Color(50, 50, 50);
-	private Color bColorActive = new Color(255, 210, 0);
+	private Color bColorInactive = new Color(0x339900);
+	private Color bColorActive = new Color(0x7DCC00);
 
 	// Range of the Bar
 	private int currentStartBX; // this one moves around
@@ -65,6 +65,9 @@ public class TernarySlider {
 	// States
 	private boolean[] state = { false, true, false };
 	private String[] stateLabel;
+	
+	// Changed
+	private boolean changed = false;
 
 	private PApplet parent;
 
@@ -234,5 +237,13 @@ public class TernarySlider {
 
 	public int getsW() {
 		return sW;
+	}
+
+	public boolean[] getState() {
+		return state;
+	}
+	
+	public boolean hasChanged(){
+		return changed;
 	}
 }
