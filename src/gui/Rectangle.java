@@ -12,7 +12,7 @@ import squarification.Squarification;
 
 public class Rectangle implements RectInterface {
 
-	private double area;
+	public double area;
 	private int dimX;
 	private int dimY;
 	private int startX;
@@ -29,13 +29,21 @@ public class Rectangle implements RectInterface {
 	// Remember Klicked
 	private boolean klicked;
 
-	Diagram parent;
+	// InfoBox
+	InfoBox infoBox;
 
-	public Rectangle(double area, String title, char category, Diagram parent) {
+	Diagram parentDia;
+	Main parentMain;
+
+	public Rectangle(double area, String title, char category, Diagram parent,
+			Main parentApplet) {
 		this.area = area;
-		this.parent = parent;
+		this.parentDia = parent;
+		this.parentMain = parentApplet;
 		this.title = title;
 		this.klicked = false;
+		infoBox = new InfoBox(title, this, parent, parentApplet);
+
 		setColor(category);
 	}
 
@@ -43,16 +51,17 @@ public class Rectangle implements RectInterface {
 
 		subRects = new ArrayList<SubRectangle>();
 		sum = 0;
-		
-		boolean[] gender = parent.genderSlider.getState();
-		boolean[] origin = parent.originSlider.getState();
-		boolean[] age = parent.ageSlider.getState();
 
-		ResultSet rs = Querying.getSubDBvaluesByFilter(title, gender, origin, age);
+		boolean[] gender = parentDia.genderSlider.getState();
+		boolean[] origin = parentDia.originSlider.getState();
+		boolean[] age = parentDia.ageSlider.getState();
+
+		ResultSet rs = Querying.getSubDBvaluesByFilter(title, gender, origin,
+				age);
 
 		while (rs.next()) {
 			subRects.add(new SubRectangle(rs.getInt(1), rs.getString(2), rs
-					.getString(3).toCharArray()[0], parent));
+					.getString(3).toCharArray()[0], this, parentDia, parentMain));
 			sum = sum + rs.getInt(1);
 		}
 
@@ -122,38 +131,33 @@ public class Rectangle implements RectInterface {
 
 	public void display() {
 
-		parent.parent.fill(color.getRed(), color.getGreen(), color.getBlue());
-		parent.parent.rect((float) (startX + margin), (float) (startY + margin),
+		parentMain.fill(color.getRed(), color.getGreen(), color.getBlue());
+		parentMain.rect((float) (startX + margin), (float) (startY + margin),
 				(float) (dimX - 2 * margin), (float) (dimY - 2 * margin));
 
 		if (klicked == true) {
 			for (int i = 0; i < subRects.size(); i++) {
 				subRects.get(i).display();
 			}
-			
+
 			for (int i = 0; i < subRects.size(); i++) {
-				subRects.get(i).mouseText();
+				subRects.get(i).showInfoBox();
 			}
 		}
 	}
 
-	public void mouseText() {
+	public void showInfoBox() {
+
 		if (!klicked) {
-			if (parent.parent.mouseX > startX && parent.parent.mouseX < startX + dimX
-					&& parent.parent.mouseY > startY && parent.parent.mouseY < startY + dimY) {
-				parent.parent.fill(0);
-				PFont f = parent.parent.createFont("FFScala", 20);
-				parent.parent.textFont(f);
-				parent.parent.textAlign(PConstants.CENTER);
-				parent.parent.text(title, parent.parent.mouseX, parent.parent.mouseY);
+			if (isInRect()) {
+				infoBox.display();
 			}
 		}
 	}
 
 	public void mouseKlick() {
 
-		if (parent.parent.mouseX > startX && parent.parent.mouseX < startX + dimX
-				&& parent.parent.mouseY > startY && parent.parent.mouseY < startY + dimY) {
+		if (isInRect()) {
 
 			klicked = !klicked;
 
@@ -165,6 +169,16 @@ public class Rectangle implements RectInterface {
 				e.printStackTrace();
 			}
 		}
+	}
+
+	private boolean isInRect() {
+
+		if (parentMain.mouseX > startX && parentMain.mouseX < startX + dimX
+				&& parentMain.mouseY > startY
+				&& parentMain.mouseY < startY + dimY) {
+			return true;
+		} else
+			return false;
 
 	}
 }

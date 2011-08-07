@@ -40,8 +40,8 @@ public class Diagram {
 
 	// Borders
 	int borderX = 20;
-	int borderYtop = 50;
-	int boderYbottom = 50;
+	int borderYtop = 120;
+	int boderYbottom = 80;
 
 	// Space between diagram and slider
 	int space = 5;
@@ -53,12 +53,12 @@ public class Diagram {
 	int sum;
 
 	// PApplet to draw on
-	Main parent;
+	Main parentMain;
 
 	public Diagram(int w, int h, Main parent) {
 		this.w = w;
 		this.h = h;
-		this.parent = parent;
+		this.parentMain = parent;
 	}
 
 	/**
@@ -119,10 +119,10 @@ public class Diagram {
 	public void display() {
 
 		// color of the slider area
-		parent.fill(220);
+		parentMain.fill(255);
 
 		// draw slider areas
-		parent.rect(startSliderAreaX, startSliderAreaY, dimSliderX, dimSliderY
+		parentMain.rect(startSliderAreaX, startSliderAreaY, dimSliderX, dimSliderY
 				- 2 * space);
 
 		// draw the sliders
@@ -137,7 +137,7 @@ public class Diagram {
 
 		// display mouse Text (Categorys)
 		for (Rectangle r : rects)
-			r.mouseText();
+			r.showInfoBox();
 	}
 
 	public void mouseDragged() {
@@ -154,15 +154,15 @@ public class Diagram {
 
 	public void mouseReleased() {
 
-		if (parent.mouseX > areaSartX && parent.mouseX < areaSartX + dimX
-				&& parent.mouseY > areaStartY
-				&& parent.mouseY < areaStartY + dimY) {
+		if (parentMain.mouseX > areaSartX && parentMain.mouseX < areaSartX + dimX
+				&& parentMain.mouseY > areaStartY
+				&& parentMain.mouseY < areaStartY + dimY) {
 
 			for (Rectangle r : rects) {
 				r.mouseKlick();
 			}
 
-			parent.redraw();
+			parentMain.redraw();
 			return;
 		}
 
@@ -189,7 +189,7 @@ public class Diagram {
 
 		doSquarification();
 
-		parent.redraw();
+		parentMain.redraw();
 	}
 
 	/**
@@ -205,18 +205,18 @@ public class Diagram {
 		int startYgender = startSliderAreaY + sliderBorderTop;
 
 		String[] labelGender = { "Männer", "Alle", "Frauen" };
-		String[] labelOrigin = { "Deutsch", "Alle", "Ausländer" };
+		String[] labelOrigin = { "Deutsche", "Alle", "Ausländer" };
 		String[] labelAge = { "14-18", "18-21", "21-25", "25-30", "30-40",
 				"40-50", "50+" };
 
 		genderSlider = new TernarySlider(startXgender, startYgender,
-				labelGender, parent);
+				labelGender, parentMain);
 
 		originSlider = new TernarySlider(startXgender + genderSlider.getsW()
-				+ (int)(4.7 * sliderBorderLeft), startYgender, labelOrigin, parent);
+				+ (int)(4.7 * sliderBorderLeft), startYgender, labelOrigin, parentMain);
 
 		ageSlider = new RangeSlider(startXgender, startYgender
-				+ (int) (1.5 * sliderBorderTop), 7, labelAge, parent);
+				+ (int) (1.5 * sliderBorderTop), 7, labelAge, parentMain);
 	}
 
 	/**
@@ -225,15 +225,15 @@ public class Diagram {
 	 */
 	private void addListener() {
 
-		parent.addMouseMotionListener(new MouseMotionListener() {
+		parentMain.addMouseMotionListener(new MouseMotionListener() {
 			@Override
 			public void mouseDragged(MouseEvent e) {
-				parent.redraw();
+				parentMain.redraw();
 			}
 
 			@Override
 			public void mouseMoved(MouseEvent e) {
-				parent.redraw();
+				parentMain.redraw();
 			}
 		});
 	}
@@ -257,7 +257,7 @@ public class Diagram {
 
 		while (rs.next()) {
 			rects.add(new Rectangle(rs.getInt(1), rs.getString(2), rs
-					.getString(3).toCharArray()[0], this));
+					.getString(3).toCharArray()[0], this, parentMain));
 			sum = sum + rs.getInt(1);
 		}
 	}

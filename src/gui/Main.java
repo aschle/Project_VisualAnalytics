@@ -7,6 +7,8 @@ import javax.swing.border.TitledBorder;
 import database.DBConnector;
 import database.Parser;
 import processing.core.PApplet;
+import processing.core.PConstants;
+import processing.core.PFont;
 
 public class Main extends PApplet {
 
@@ -32,8 +34,16 @@ public class Main extends PApplet {
 	int borderXright = 20;
 	int borderYbottom = 50;
 	int borderYtop = 25;
+	
+	PFont f;
+	PFont fbold;
 
 	public void setup() {
+
+		// Schrift laden
+		f = createFont("FFScala", 20);
+		fbold = createFont("FFScala-Bold-12.vlw", 16);
+		textFont(f);
 
 		// fill the whole screen
 		w = screenWidth;
@@ -83,6 +93,27 @@ public class Main extends PApplet {
 
 		dia1.display();
 		dia2.display();
+		fill(0);
+
+		// Quellenangabe:
+		int space = 30;
+		textAlign(PConstants.LEFT);
+		textSize(14);
+		text("Quelle: Statistisches Bundesamt Deutschland, Strafverfolgungsstatistik 2009",
+				dia1.areaSartX, dia1.startSliderAreaY + dia1.dimSliderY + space);
+		textAlign(PConstants.RIGHT);
+		text("Alexa Schlegel, Freie Universität Berlin", (int) (dia2.areaSartX + dia2.dimX),
+				dia1.startSliderAreaY + dia1.dimSliderY + space);
+
+		// Überschrift
+		textAlign(PConstants.CENTER);
+		textSize(14);
+		text("Anzahl der Verurteilten nach Arte der Straftat, Alter, Geschlecht und Herkunft",
+				w / 2, dia1.areaSartX + 2 * space);
+		textSize(26);
+		text("Strafverfolgungsstatistik-Explorer", w / 2, dia1.areaSartX
+				+ space);
+
 	}
 
 	/**
