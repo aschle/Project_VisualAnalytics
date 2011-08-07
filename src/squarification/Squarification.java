@@ -15,7 +15,7 @@ public class Squarification {
 
 	// position to start with the layout
 	private double posX = 0;
-	
+
 	// normalize factor
 	private double norm = 1;
 
@@ -34,7 +34,7 @@ public class Squarification {
 
 		// remember: norm is 1 initially!
 		norm = dimX * dimY / getSum(children);
-		
+
 		squarify(children);
 	}
 
@@ -48,14 +48,21 @@ public class Squarification {
 			// get the child with the maximal area
 			RectInterface child = getMax(children);
 
-			if (row.isEmpty() || worst(row) >= worst(concat(row, child))) {
-
+			if (children.size() == 1) {
+				System.out.println("Keine Kinder Mehr");
 				children = getTail(children, child);
 				row = concat(row, child);
-
 			} else {
-				layoutRow(row);
-				row = new ArrayList<RectInterface>();
+
+				if (row.isEmpty() || worst(row) >= worst(concat(row, child))) {
+
+					children = getTail(children, child);
+					row = concat(row, child);
+
+				} else {
+					layoutRow(row);
+					row = new ArrayList<RectInterface>();
+				}
 			}
 		}
 		layoutRow(row);
@@ -99,7 +106,8 @@ public class Squarification {
 
 		for (int i = 0; i < row.size(); i++) {
 
-			double dividedRect = normalize(row.get(i).getArea()) / notDividedRect;
+			double dividedRect = normalize(row.get(i).getArea())
+					/ notDividedRect;
 
 			if (isDimX == false) {
 				offsetY = offsetY - dividedRect;
@@ -192,8 +200,8 @@ public class Squarification {
 		}
 		return sum;
 	}
-	
-	private double normalize(double value){
+
+	private double normalize(double value) {
 		return value * norm;
 	}
 }

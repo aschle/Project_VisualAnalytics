@@ -31,7 +31,7 @@ public class Main extends PApplet {
 	int borderXleft = 25;
 	int borderXright = 20;
 	int borderYbottom = 50;
-	int borderYtop = 70;
+	int borderYtop = 25;
 
 	public void setup() {
 
@@ -71,7 +71,8 @@ public class Main extends PApplet {
 
 		dia1 = new Diagram(diaW, diaH, this);
 		dia2 = new Diagram(diaW, diaH, this);
-		dia2.setOffset(w / 2 + borderXleft, 0);
+		dia1.setOffset(borderXleft, borderYtop);
+		dia2.setOffset(w / 2 + borderXleft, borderYtop);
 		dia1.setup();
 		dia2.setup();
 	}
