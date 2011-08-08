@@ -3,7 +3,10 @@ package gui;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
 import java.sql.ResultSet;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
+
+import processing.core.PConstants;
 
 import database.Querying;
 import squarification.Squarification;
@@ -130,6 +133,19 @@ public class Diagram {
 	 */
 	public void display() {
 
+		parentMain.textAlign(PConstants.LEFT);
+		parentMain.textSize(14);
+		parentMain.fill(0);
+		DecimalFormat komma = new DecimalFormat("0.00");
+		String sPercent = komma
+				.format(Math.round((sum * 100. / 844520) * 100.) / 100.);
+		parentMain.textFont(parentMain.f);
+		parentMain.text(sPercent.concat(" %"), areaSartX, areaStartY - 6);
+		int tW = (int) parentMain.textWidth(sPercent.concat(" %"));
+		parentMain.textFont(parentMain.fsmall);
+		parentMain.text("von 844.520 Verurteilten", areaSartX + tW + 15,
+				areaStartY - 6);
+
 		// color of the slider area
 		parentMain.fill(255);
 
@@ -210,7 +226,7 @@ public class Diagram {
 	private void setupSlider() {
 
 		int sliderBorderTop = 40;
-		int sliderBorderLeft = 20;
+		int sliderBorderLeft = (dimSliderX - 440) / 2;
 
 		int startXgender = startSliderAreaX + sliderBorderLeft;
 		int startYgender = startSliderAreaY + sliderBorderTop;
@@ -224,7 +240,7 @@ public class Diagram {
 				labelGender, parentMain);
 
 		originSlider = new TernarySlider(startXgender + genderSlider.getsW()
-				+ (int) (4.7 * sliderBorderLeft), startYgender, labelOrigin,
+				+ (int) (sliderBorderLeft + 40), startYgender, labelOrigin,
 				parentMain);
 
 		ageSlider = new RangeSlider(startXgender, startYgender
