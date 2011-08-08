@@ -122,8 +122,8 @@ public class Diagram {
 		parentMain.fill(255);
 
 		// draw slider areas
-		parentMain.rect(startSliderAreaX, startSliderAreaY, dimSliderX, dimSliderY
-				- 2 * space);
+		parentMain.rect(startSliderAreaX, startSliderAreaY, dimSliderX,
+				dimSliderY - 2 * space);
 
 		// draw the sliders
 		genderSlider.display();
@@ -135,7 +135,7 @@ public class Diagram {
 			rects.get(i).display();
 		}
 
-		// display mouse Text (Categorys)
+		// display info boxes (Categorys)
 		for (Rectangle r : rects)
 			r.showInfoBox();
 	}
@@ -154,7 +154,8 @@ public class Diagram {
 
 	public void mouseReleased() {
 
-		if (parentMain.mouseX > areaSartX && parentMain.mouseX < areaSartX + dimX
+		if (parentMain.mouseX > areaSartX
+				&& parentMain.mouseX < areaSartX + dimX
 				&& parentMain.mouseY > areaStartY
 				&& parentMain.mouseY < areaStartY + dimY) {
 
@@ -213,7 +214,8 @@ public class Diagram {
 				labelGender, parentMain);
 
 		originSlider = new TernarySlider(startXgender + genderSlider.getsW()
-				+ (int)(4.7 * sliderBorderLeft), startYgender, labelOrigin, parentMain);
+				+ (int) (4.7 * sliderBorderLeft), startYgender, labelOrigin,
+				parentMain);
 
 		ageSlider = new RangeSlider(startXgender, startYgender
 				+ (int) (1.5 * sliderBorderTop), 7, labelAge, parentMain);

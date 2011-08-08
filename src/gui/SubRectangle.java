@@ -86,5 +86,4 @@ public class SubRectangle implements RectInterface {
 			return false;
 
 	}
-
 }

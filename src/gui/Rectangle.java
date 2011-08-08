@@ -139,10 +139,6 @@ public class Rectangle implements RectInterface {
 			for (int i = 0; i < subRects.size(); i++) {
 				subRects.get(i).display();
 			}
-
-			for (int i = 0; i < subRects.size(); i++) {
-				subRects.get(i).showInfoBox();
-			}
 		}
 	}
 
@@ -151,6 +147,10 @@ public class Rectangle implements RectInterface {
 		if (!klicked) {
 			if (isInRect()) {
 				infoBox.display();
+			}
+		} else {
+			for (int i = 0; i < subRects.size(); i++) {
+				subRects.get(i).showInfoBox();
 			}
 		}
 	}

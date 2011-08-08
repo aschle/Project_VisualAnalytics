@@ -28,7 +28,7 @@ public class InfoBox {
 
 	private String[] labels = { "gegen die Person", "Bundes", "sexuelle",
 			"Raub", "öffentliche", "Umwelt", "Straßenverkehr",
-			"Betäubungsmittel", "Aufenthaltsgesetz", "schwere" };
+			"Betäubungsmittel", "Aufenthaltsgesetz", "schwere", "Kindern", "Unterhalt" };
 
 	public InfoBox(String title, RectInterface parentRect, Diagram parent,
 			Main parentApplet) {
@@ -52,7 +52,6 @@ public class InfoBox {
 
 		if (isLeft() && isTop()) {
 			drawBox(0, 0);
-
 		}
 
 		if (isLeft() && !isTop()) {
@@ -66,7 +65,6 @@ public class InfoBox {
 		if (!isLeft() && !isTop()) {
 			drawBox(w, h);
 		}
-
 	}
 
 	private void drawBox(int offsetX, int offsetY) {

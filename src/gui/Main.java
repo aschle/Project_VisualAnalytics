@@ -2,8 +2,6 @@ package gui;
 
 import java.io.File;
 
-import javax.swing.border.TitledBorder;
-
 import database.DBConnector;
 import database.Parser;
 import processing.core.PApplet;
@@ -34,7 +32,7 @@ public class Main extends PApplet {
 	int borderXright = 20;
 	int borderYbottom = 50;
 	int borderYtop = 25;
-	
+
 	PFont f;
 	PFont fbold;
 
@@ -102,8 +100,9 @@ public class Main extends PApplet {
 		text("Quelle: Statistisches Bundesamt Deutschland, Strafverfolgungsstatistik 2009",
 				dia1.areaSartX, dia1.startSliderAreaY + dia1.dimSliderY + space);
 		textAlign(PConstants.RIGHT);
-		text("Alexa Schlegel, Freie Universität Berlin", (int) (dia2.areaSartX + dia2.dimX),
-				dia1.startSliderAreaY + dia1.dimSliderY + space);
+		text("Alexa Schlegel, Freie Universität Berlin",
+				(int) (dia2.areaSartX + dia2.dimX), dia1.startSliderAreaY
+						+ dia1.dimSliderY + space);
 
 		// Überschrift
 		textAlign(PConstants.CENTER);
