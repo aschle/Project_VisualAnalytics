@@ -5,8 +5,6 @@ import java.sql.ResultSet;
 import java.util.ArrayList;
 
 import database.Querying;
-import processing.core.PConstants;
-import processing.core.PFont;
 import squarification.RectInterface;
 import squarification.Squarification;
 
@@ -23,11 +21,8 @@ public class Rectangle implements RectInterface {
 	private static int margin = 1;
 
 	// Subgroups
-	ArrayList<SubRectangle> subRects = new ArrayList<SubRectangle>();
+	public ArrayList<SubRectangle> subRects = new ArrayList<SubRectangle>();
 	private int sum;
-
-	// Remember Klicked
-	private boolean klicked;
 
 	// InfoBox
 	InfoBox infoBox;
@@ -41,9 +36,7 @@ public class Rectangle implements RectInterface {
 		this.parentDia = parent;
 		this.parentMain = parentApplet;
 		this.title = title;
-		this.klicked = false;
 		infoBox = new InfoBox(title, this, parent, parentApplet);
-
 		setColor(category);
 	}
 
@@ -134,40 +127,12 @@ public class Rectangle implements RectInterface {
 		parentMain.fill(color.getRed(), color.getGreen(), color.getBlue());
 		parentMain.rect((float) (startX + margin), (float) (startY + margin),
 				(float) (dimX - 2 * margin), (float) (dimY - 2 * margin));
-
-		if (klicked == true) {
-			for (int i = 0; i < subRects.size(); i++) {
-				subRects.get(i).display();
-			}
-		}
 	}
 
 	public void showInfoBox() {
 
-		if (!klicked) {
-			if (isInRect()) {
-				infoBox.display();
-			}
-		} else {
-			for (int i = 0; i < subRects.size(); i++) {
-				subRects.get(i).showInfoBox();
-			}
-		}
-	}
-
-	public void mouseKlick() {
-
 		if (isInRect()) {
-
-			klicked = !klicked;
-
-			try {
-				getSubRectangles();
-			} catch (Exception e) {
-				System.out
-						.println("Error, while getting subCategries from DB.");
-				e.printStackTrace();
-			}
+			infoBox.display();
 		}
 	}
 
@@ -179,6 +144,5 @@ public class Rectangle implements RectInterface {
 			return true;
 		} else
 			return false;
-
 	}
 }

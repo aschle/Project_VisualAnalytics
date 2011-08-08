@@ -96,6 +96,18 @@ public class Diagram {
 		}
 
 		doSquarification();
+
+		for (Rectangle r : rects) {
+			try {
+				r.getSubRectangles();
+			} catch (Exception e) {
+				System.out
+						.println("Error, while loading new data from the DB.");
+				e.printStackTrace();
+				System.exit(1);
+			}
+		}
+
 		display();
 	}
 
@@ -154,19 +166,6 @@ public class Diagram {
 
 	public void mouseReleased() {
 
-		if (parentMain.mouseX > areaSartX
-				&& parentMain.mouseX < areaSartX + dimX
-				&& parentMain.mouseY > areaStartY
-				&& parentMain.mouseY < areaStartY + dimY) {
-
-			for (Rectangle r : rects) {
-				r.mouseKlick();
-			}
-
-			parentMain.redraw();
-			return;
-		}
-
 		genderSlider.mouseReleased();
 		originSlider.mouseReleased();
 		ageSlider.mouseReleased();
@@ -186,6 +185,17 @@ public class Diagram {
 			System.out.println("Error, while loading new data from the DB.");
 			e.printStackTrace();
 			System.exit(1);
+		}
+
+		for (Rectangle r : rects) {
+			try {
+				r.getSubRectangles();
+			} catch (Exception e) {
+				System.out
+						.println("Error, while loading new data from the DB.");
+				e.printStackTrace();
+				System.exit(1);
+			}
 		}
 
 		doSquarification();

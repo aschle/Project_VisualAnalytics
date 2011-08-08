@@ -33,14 +33,17 @@ public class Main extends PApplet {
 	int borderYbottom = 50;
 	int borderYtop = 25;
 
+	// Schriftarten
 	PFont f;
 	PFont fbold;
+	PFont fsmall;
 
 	public void setup() {
 
 		// Schrift laden
 		f = createFont("FFScala", 20);
 		fbold = createFont("FFScala-Bold-12.vlw", 16);
+		fsmall = createFont("FFScala-Bold-12.vlw", 14);
 		textFont(f);
 
 		// fill the whole screen
@@ -89,8 +92,6 @@ public class Main extends PApplet {
 		background(255);
 		noStroke();
 
-		dia1.display();
-		dia2.display();
 		fill(0);
 
 		// Quellenangabe:
@@ -112,6 +113,9 @@ public class Main extends PApplet {
 		textSize(26);
 		text("Strafverfolgungsstatistik-Explorer", w / 2, dia1.areaSartX
 				+ space);
+
+		dia1.display();
+		dia2.display();
 
 	}
 

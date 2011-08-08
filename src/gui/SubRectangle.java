@@ -10,15 +10,12 @@ public class SubRectangle implements RectInterface {
 	private int dimY;
 	private int startX;
 	private int startY;
-	private String title; // name
+	public String title; // name
 	private Color color = new Color(0xAAAAAA);
 
 	private int offsetX = 0;
 	private int offsetY = 0;
 	private static int margin = 1;
-
-	// InfoBox
-	InfoBox infoBox;
 
 	Diagram parentDia;
 	Main parentMain;
@@ -33,8 +30,41 @@ public class SubRectangle implements RectInterface {
 		this.title = title;
 		this.offsetX = 0;
 		this.offsetY = 0;
+		setColor(category);
+	}
 
-		infoBox = new InfoBox(title, this, parentDia, parentMain);
+	public void setColor(char category) {
+		switch (category) {
+		case 'A':
+			color = new Color(0x68CBE7); // blue
+			break;
+		case 'B':
+			color = new Color(0xA66600); // orange
+			break;
+		case 'C':
+			color = new Color(0xB9A733); // yellow
+			break;
+		case 'D':
+			color = new Color(0xE73A3A); // red
+			break;
+		case 'E':
+			color = new Color(0xA4E639); // green
+			break;
+		case 'F':
+			color = new Color(0x65CC33); // dark green
+			break;
+		case 'G':
+			color = new Color(0xD699D3); // purple
+			break;
+		case 'H':
+			color = new Color(0xB3B3B3); // grey
+			break;
+		case 'I':
+			color = new Color(0x5C86D9); // blue
+			break;
+		default:
+			break;
+		}
 	}
 
 	@Override
@@ -67,13 +97,6 @@ public class SubRectangle implements RectInterface {
 		parentDia.parentMain.rect((float) (startX + margin),
 				(float) (startY + margin), (float) (dimX - 2 * margin),
 				(float) (dimY - 2 * margin));
-	}
-
-	public void showInfoBox() {
-
-		if (isInRect()) {
-			infoBox.display();
-		}
 	}
 
 	private boolean isInRect() {

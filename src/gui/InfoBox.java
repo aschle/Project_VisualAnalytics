@@ -1,36 +1,49 @@
 package gui;
 
+import java.awt.image.TileObserver;
 import java.text.DecimalFormat;
 import java.util.Locale;
-
 import processing.core.PConstants;
-import squarification.RectInterface;
 
 public class InfoBox {
 
-	private RectInterface parentRect;
+	private Rectangle parentRect;
 	private Diagram parentDia;
 	private Main parentMain;
 
 	private String title;
 
 	private int titleLines = 1;
-	private int space = 5;
+	private int space = 10;
 
-	private int w = 260;
-	private int h = 150;
+	private int w = 360;
+	private int h = 250;
 
 	private int borderX = 10;
 	private int borderY = 15;
 
-	int textW;
+	int textWTitle;
 	int textH;
 
-	private String[] labels = { "gegen die Person", "Bundes", "sexuelle",
-			"Raub", "öffentliche", "Umwelt", "Straßenverkehr",
-			"Betäubungsmittel", "Aufenthaltsgesetz", "schwere", "Kindern", "Unterhalt" };
+	int textWcategory;
 
-	public InfoBox(String title, RectInterface parentRect, Diagram parent,
+	int leading = 16;
+
+	// for positioning the text
+	int x;
+	int y;
+
+	int X;
+	int Y;
+
+	int lines;
+
+	private String[] labels = { "Bundes", "sexuelle", "Raub", "öffentliche",
+			"Umwelt" };
+
+	private String[] subLabels = {};
+
+	public InfoBox(String title, Rectangle parentRect, Diagram parent,
 			Main parentApplet) {
 
 		this.parentRect = parentRect;
@@ -44,8 +57,10 @@ public class InfoBox {
 				titleLines = 2;
 		}
 
-		textW = w - 2 * borderX;
+		textWTitle = w - 2 * borderX;
 		textH = h - 2 * borderY;
+		textWcategory = (textWTitle / 5) * 3 + space;
+
 	}
 
 	public void display() {
@@ -69,8 +84,10 @@ public class InfoBox {
 
 	private void drawBox(int offsetX, int offsetY) {
 
-		int x = parentMain.mouseX - offsetX;
-		int y = parentMain.mouseY - offsetY;
+		x = parentMain.mouseX - offsetX;
+		y = parentMain.mouseY - offsetY;
+		X = parentMain.mouseX - offsetX;
+		Y = parentMain.mouseY - offsetY;
 
 		// Rectangle(background)
 		parentMain.stroke(100, 100, 100);
@@ -80,74 +97,97 @@ public class InfoBox {
 		parentMain.noStroke();
 
 		// Title
-
 		x = x + borderX;
 		y = y + borderY;
 
 		parentMain.fill(0);
 		parentMain.textFont(parentMain.fbold);
 		parentMain.textAlign(PConstants.LEFT);
-		parentMain.text(title, x, y, textW, textH);
-		parentMain.textFont(parentMain.f, 14);
+		parentMain.text(title, x, y, textWTitle, textH);
 
 		// Borderline
 		parentMain.fill(100);
-
 		y = y + titleLines * 20 + titleLines * space;
-
 		parentMain.rect(x, y, w - 2 * borderX, 1);
 
-		// Gesamtanzahl
-		y = y + 20;
-		parentMain.text("Gesamtanzahl: ", x, y);
-		parentMain.textAlign(PConstants.RIGHT);
+		// neuen Text laden
+		parentMain.textFont(parentMain.fsmall);
+		parentMain.textLeading(leading);
 
-		DecimalFormat df = (DecimalFormat) DecimalFormat
+		y = y + space;
+
+		if (parentRect.subRects.size() > 1) {
+			// Unterkategorie % #
+
+			// Sonstiges soll ans Ende
+			String titleSonstiges = "Sonstiges";
+			double valueSonstiges = 0;
+
+			for (SubRectangle r : parentRect.subRects) {
+
+				if (r.title.equals("Sonstiges")) {
+					valueSonstiges = r.getArea();
+				} else {
+
+					printLine(r.title, r.getArea());
+				}
+			}
+
+			if (valueSonstiges != 0) {
+				printLine(titleSonstiges, valueSonstiges);
+			}
+
+			// Border
+			parentMain.fill(100);
+			parentMain.rect(x, y, w - 2 * borderX, 1);
+		}
+
+		// Gesamtanzahl % Summe
+		parentMain.fill(0);
+		DecimalFormat komma = new DecimalFormat("0.00");
+		String sPercent = komma
+				.format(Math.round((parentRect.getArea() * 100 / parentDia.sum) * 100.) / 100.);
+		y = y + space;
+		parentMain.text("Gesamt:", x, y, textWcategory, 20);
+		int tempX = x + textWcategory - space;
+		parentMain.textAlign(PConstants.RIGHT);
+		parentMain.text(sPercent.concat(" %"), tempX, y, 60, 20);
+		tempX = X + textWTitle - 40;
+		DecimalFormat dots = (DecimalFormat) DecimalFormat
 				.getInstance(Locale.GERMAN);
-		df.applyPattern("#,###,##0");
+		dots.applyPattern("#,###,##0");
+		String sAbsolut = dots.format(parentRect.getArea());
+		parentMain.text(sAbsolut, tempX, y, 50, 20);
 
-		String s;
-		if (parentRect instanceof SubRectangle) {
-			s = df.format(((SubRectangle) parentRect).parentRect.getArea());
-		} else {
-			s = df.format(parentDia.sum);
-		}
+	}
 
-		parentMain.fill(0);
-		parentMain.text(s, x + textW, y);
-		parentMain.textAlign(PConstants.LEFT);
-		parentMain.fill(100);
+	private void printLine(String title, double value) {
 
-		// Absolute Zahlen
-		y = y + 20;
-		parentMain.text("Verurteilte: ", x, y);
+		// Gesamtsumme
+		int mainSum = (int) parentDia.sum;
 
-		if (parentRect instanceof SubRectangle) {
-			s = df.format(parentRect.getArea());
-		} else {
-			s = df.format(parentRect.getArea());
-		}
+		// Dezimaldarstellung
+		DecimalFormat dots = (DecimalFormat) DecimalFormat
+				.getInstance(Locale.GERMAN);
+		dots.applyPattern("#,###,##0");
+		DecimalFormat komma = new DecimalFormat("0.00");
 
+		String sAbsolut = dots.format(value);
+		String sPercent = komma.format(Math
+				.round((value * 100 / mainSum) * 100.) / 100.);
+
+		lines = (int) Math.ceil(parentMain.textWidth(title) / textWcategory);
+
+		parentMain.text(title, x, y, textWcategory, textH);
+		int tempX = x + textWcategory - space;
 		parentMain.textAlign(PConstants.RIGHT);
+		parentMain.text(sPercent.concat(" %"), tempX, y, 60, 20);
 
-		parentMain.fill(0);
-		parentMain.text(s, x + textW, y);
+		tempX = X + textWTitle - 40;
+
+		parentMain.text(sAbsolut, tempX, y, 50, 20);
+		y = y + lines * leading + space;
 		parentMain.textAlign(PConstants.LEFT);
-
-		// BorderLine
-		parentMain.fill(100);
-		y = y + space + 5;
-		parentMain.rect(x, y, w - 2 * borderX, 1);
-
-		// Numbers in percent
-		y = y + 20;
-		double numberPercent = (100 * parentRect.getArea()) / parentDia.sum;
-		double my = Math.round(numberPercent * 100.) / 100.;
-		DecimalFormat dfnew = new DecimalFormat("0.00");
-		s = dfnew.format(my);
-		parentMain.fill(0);
-		parentMain.textAlign(PConstants.RIGHT);
-		parentMain.text(s.concat(" %"), x + textW, y);
 	}
 
 	private boolean isLeft() {

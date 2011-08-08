@@ -48,23 +48,27 @@ public class Squarification {
 			// get the child with the maximal area
 			RectInterface child = getMax(children);
 
-			if (children.size() == 1) {
-				System.out.println("Keine Kinder Mehr");
+			/*
+			 *  Add rectangle to row, if ..
+			 *  1. row is empty (new row)
+			 *  2. old maximum ratio is worse (greater) than new maximum ratio
+			 *  3. rectangle is the last rectangle to process
+			 *  .. else create a new row and calculate the rectangle dimensions of the old one.
+			 */
+			if (children.size() == 1 || row.isEmpty() || worst(row) >= worst(concat(row, child))) {
+
 				children = getTail(children, child);
 				row = concat(row, child);
+
 			} else {
-
-				if (row.isEmpty() || worst(row) >= worst(concat(row, child))) {
-
-					children = getTail(children, child);
-					row = concat(row, child);
-
-				} else {
-					layoutRow(row);
-					row = new ArrayList<RectInterface>();
-				}
+				
+				layoutRow(row);
+				row = new ArrayList<RectInterface>();
+				
 			}
+			
 		}
+		
 		layoutRow(row);
 	}
 
